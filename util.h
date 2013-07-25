@@ -20,7 +20,7 @@
 
 void set_thread_name(char *thread_name);
 
-int parse_host_and_port(char *input, char **hostname, char **service, int *port_set);
+int parse_host_and_port(char *input, struct io *io);
 char *my_inet_ntop(int family, struct sockaddr *addr, char *dest, int dest_len);
 
 int create_dir(const char *dir, mode_t mode);

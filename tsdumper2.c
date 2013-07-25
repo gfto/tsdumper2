@@ -66,9 +66,11 @@ static void show_help(struct ts *ts) {
 	printf(" -D --create-dirs           | Save files in subdirs YYYY/MM/DD/HH/file.\n");
 	printf("\n");
 	printf("Input options:\n");
-	printf(" -i --input <source>        | Where to read from. Multicast address.\n");
+	printf(" -i --input <source>        | Where to read from.\n");
 	printf("                            .  -i udp://224.0.0.1:5000    (v4 multicast)\n");
 	printf("                            .  -i udp://[ff01::1111]:5000 (v6 multicast)\n");
+	printf("                            .  -i rtp://224.0.0.1:5000    (v4 RTP input)\n");
+	printf("                            .  -i rtp://[ff01::1111]:5000 (v6 RTP input)\n");
 	printf(" -z --input-ignore-disc     | Do not report discontinuty errors in input.\n");
 	printf(" -4 --ipv4                  | Use only IPv4 addresses.\n");
 	printf(" -6 --ipv6                  | Use only IPv6 addresses.\n");
@@ -77,13 +79,6 @@ static void show_help(struct ts *ts) {
 	printf(" -h --help                  | Show help screen.\n");
 	printf(" -V --version               | Show program version.\n");
 	printf("\n");
-}
-
-static int parse_io_param(struct io *io, char *opt) {
-	int port_set = 0;
-	io->type = NET_IO;
-	int host_set = parse_host_and_port(opt, &io->hostname, &io->service, &port_set);
-	return !(!port_set || !host_set);
 }
 
 extern char *optarg;
@@ -111,7 +106,7 @@ static void parse_options(struct ts *ts, int argc, char **argv) {
 				ts->create_dirs = !ts->create_dirs;
 				break;
 			case 'i': // --input
-				input_addr_err = !parse_io_param(&ts->input, optarg);
+				input_addr_err = !parse_host_and_port(optarg, &ts->input);
 				break;
 			case 'z': // --input-ignore-disc
 				ts->ts_discont = !ts->ts_discont;
@@ -140,7 +135,10 @@ static void parse_options(struct ts *ts, int argc, char **argv) {
 	}
 
 	p_info("Prefix     : %s\n", ts->prefix);
-	p_info("Input addr : udp://%s:%s/\n", ts->input.hostname, ts->input.service);
+	p_info("Input addr : %s://%s:%s/\n",
+		ts->input.type == UDP ? "udp" :
+		ts->input.type == RTP ? "rtp" : "???",
+		ts->input.hostname, ts->input.service);
 	p_info("Seconds    : %u\n", ts->rotate_secs);
 	p_info("Output dir : %s (create directories: %s)\n", ts->output_dir,
 		ts->create_dirs ? "YES" : "no");
@@ -204,7 +202,6 @@ static uint8_t rtp_hdr[2][RTP_HDR_SZ];
 static struct ts ts;
 
 int main(int argc, char **argv) {
-	ssize_t readen;
 	int i;
 	int have_data = 1;
 	int ntimeouts = 0;
@@ -244,8 +241,13 @@ int main(int argc, char **argv) {
 
 	p_info("Start %s\n", program_id);
 
-	if (ts.input.type == NET_IO && udp_connect_input(&ts.input) < 1)
-		goto EXIT;
+	switch (ts.input.type) {
+	case UDP:
+	case RTP:
+		if (udp_connect_input(&ts.input) < 1)
+			exit(EXIT_FAILURE);
+		break;
+	}
 
 	signal(SIGCHLD, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
@@ -257,10 +259,13 @@ int main(int argc, char **argv) {
 
 	int data_received = 0;
 	do {
+		ssize_t readen = -1;
 		set_log_io_errors(0);
-		if (!ts.rtp_input) {
+		switch (ts.input.type) {
+		case UDP:
 			readen = fdread_ex(ts.input.fd, (char *)ts_packet, FRAME_SIZE, 250, 4, 1);
-		} else {
+			break;
+		case RTP:
 			readen = fdread_ex(ts.input.fd, (char *)ts_packet, FRAME_SIZE + RTP_HDR_SZ, 250, 4, 1);
 			if (readen > RTP_HDR_SZ) {
 				memcpy(rtp_hdr[rtp_hdr_pos], ts_packet, RTP_HDR_SZ);
@@ -275,6 +280,7 @@ int main(int argc, char **argv) {
 							pssrc, ssrc, ((ssrc - pssrc)-1) & 0xffff);
 				num_packets++;
 			}
+			break;
 		}
 		set_log_io_errors(1);
 		if (readen < 0) {
@@ -297,7 +303,6 @@ int main(int argc, char **argv) {
 		if (!keep_running)
 			break;
 	} while (have_data);
-EXIT:
 
 	queue_add(ts.packet_queue, ts.current_packet);
 	queue_add(ts.packet_queue, NULL); // Exit write_thread

@@ -41,42 +41,47 @@ void set_thread_name(char *thread_name) {
 
 #endif
 
-int parse_host_and_port(char *input, char **hostname, char **service, int *port_set) {
+int parse_host_and_port(char *input, struct io *io) {
+	int port_set = 0;
 	char *p, *proto;
+	io->type = UDP;
 	if (strlen(input) == 0)
 		return 0;
-	proto = strstr(input, "http://");
-	if (proto == input)
-		die("HTTP input is unsupported (patch welcome): %s", input);
+	if (strstr(input, "udp://") == input)       io->type = UDP;
+	else if (strstr(input, "rtp://") == input)  io->type = RTP;
+	else
+		die("Unsupported protocol (patch welcome): %s", input);
 	proto = strstr(input, "://");
 	if (proto)
 		input = proto + 3;
-	*hostname = input;
+	io->hostname = input;
 	if (input[0] == '[') { // Detect IPv6 static address
 		p = strrchr(input, ']');
 		if (!p)
 			die("Invalid IPv6 address format: %s\n", input);
-		*hostname = input + 1; // Remove first [
+		io->hostname = input + 1; // Remove first [
 		*p = 0x00; // Remove last ]
 		char *p2 = strchr(p + 1, ':');
 		if (p2) {
 			*p2 = 0x00;
-			*service = p2 + 1;
-			*port_set = 1;
+			io->service = p2 + 1;
+			port_set = 1;
 		}
 	} else {
 		p = strrchr(input, ':');
 		if (p) {
 			*p = 0x00;
-			*service = p + 1;
-			*port_set = 1;
+			io->service = p + 1;
+			port_set = 1;
 		}
 	}
-	if (*service) {
-		char *path = strstr(*service, "/");
+	if (io->service) {
+		char *path = strstr(io->service, "/");
 		if (path)
 			path[0] = 0;
 	}
+	if (!port_set)
+		die("Port is not set in the input url.");
 	return 1;
 }
 

@@ -20,7 +20,6 @@
 #include <stdbool.h>
 
 #include "libfuncs/libfuncs.h"
-#include "util.h"
 
 // Supported values 0, 1 and 2. Higher value equals more spam in the log.
 #define DEBUG 0
@@ -32,9 +31,8 @@
 #define THREAD_STACK_SIZE (64 * 1024)
 
 enum io_type {
-	FILE_IO,
-	NET_IO,
-	WTF_IO
+	UDP,
+	RTP,
 };
 
 // 1.2MB = ~13Mbit/s
@@ -72,7 +70,6 @@ struct ts {
 	int					create_dirs;
 	int					rotate_secs;
 	int					ts_discont;
-	int					rtp_input;
 	struct io			input;
 
 	pthread_attr_t		thread_attr;
@@ -90,6 +87,8 @@ struct ts {
 	char				output_filename[OUTFILE_NAME_MAX];
 	char				output_full_filename[OUTFILE_NAME_MAX];
 };
+
+#include "util.h"
 
 // From tsdumper2.c
 struct packet *alloc_packet(struct ts *ts);
