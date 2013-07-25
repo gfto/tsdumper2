@@ -1,0 +1,100 @@
+tsdumper2
+=========
+tsdumper2 reads incoming mpeg transport stream over UDP/RTP and then
+records it to disk. The files names are generated based on preconfigured
+time interval.
+
+License
+=======
+tsdumper2 is released under GNU GPL v2.
+
+Development
+===========
+The development is done using git. tsdumper2 repository is hosted
+at http://github.com/gfto/tsdumper2
+
+To clone the repository issue the following commands:
+
+   git clone git://github.com/gfto/tsdumper2.git
+   cd tsdumper2
+   git submodule init
+   git submodule update
+   make
+
+The code is developed and tested under modern Linux. It is also
+compiled from time to time under OS X but is not tested there.
+
+To see all Makefile targets run 'make help'.
+
+Updating the code
+=================
+To update cloned tsdumper2, go to the directory where the repository
+is cloned and run the following commands:
+
+   git fetch origin
+   git merge origin/master
+   git submodule update
+   make clean all
+
+tsdumper2's master branch should always be useful so it is safe to
+use it instead of official release. The master branch will always
+be better than any released version.
+
+Command line parameters
+=======================
+tsdumper2 is controlled using command line parameters. For more information
+about the parameters see the man page. Here is a list of supported command
+line parameters:
+
+        Usage: tsdumper2 -n <name> -i <input>
+
+Settings:
+ -n --prefix <name>         | Filename prefix.
+ -s --seconds <seconds>     | How much to save (default: 60 sec).
+ -d --output-dir <dir>      | Startup directory (default: .).
+ -D --create-dirs           | Save files in subdirs YYYY/MM/DD/HH/file.
+
+Input options:
+ -i --input <source>        | Where to read from.
+                            .  -i udp://224.0.0.1:5000    (v4 multicast)
+                            .  -i udp://[ff01::1111]:5000 (v6 multicast)
+                            .  -i rtp://224.0.0.1:5000    (v4 RTP input)
+                            .  -i rtp://[ff01::1111]:5000 (v6 RTP input)
+ -z --input-ignore-disc     | Do not report discontinuty errors in input.
+ -4 --ipv4                  | Use only IPv4 addresses.
+ -6 --ipv6                  | Use only IPv6 addresses.
+
+Examples
+========
+To get a quick start here are some example command lines.
+
+Examples:
+
+   # Read multicast stream from 239.78.78.78:5000 and save it in
+   # files with test- prefix
+   tsdumper2 --input udp://239.78.78.78:5000/ --prefix test
+
+   # Same as above but create directories YYYY/MM/DD/HH and put
+   # files into the directory.
+   tsdumper2 --input udp://239.78.78.78:5000/ --prefix test --create-dirs
+
+   # Same as above but create directories YYYY/MM/DD/HH and put
+   # files into the directory and create new file each 10 seconds.
+   tsdumper2 --input udp://239.78.78.78:5000/ --prefix test --create-dirs --seconds 10
+
+Reporting bugs
+==============
+If you think you have found bug in tsdumper2, please report it to the
+e-mail listed in Contact section (see below) of this README file.
+
+Releases
+========
+Official releases can be downloaded from tsdumper2 home page which is
+
+   http://georgi.unixsol.org/programs/tsdumper2/
+
+Contact
+=======
+For patches, bug reports, complaints and so on send e-mail to
+
+   Georgi Chorbadzhiyski <georgi@unixsol.org>

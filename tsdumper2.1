@@ -1,0 +1,85 @@
+.TH TSDUMPER2 "1" "July 2013" "tsdumper2 0.9" "User Commands"
+.SH NAME
+tsdumper2 \- Record mpeg transport stream in files.
+.SH SYNOPSIS
+.B tsdumper2 -n <name> -i <input> \fI..other options..\fR
+.SH DESCRIPTION
+tsdumper2 reads incoming mpeg transport stream over UDP/RTP and then
+records it to disk. The files names are generated based on preconfigured
+time interval.
+.SH OPTIONS
+.PP
+.TP
+\fB\-n\fR, \fB\-\-prefix\fR <name>
+Set file name prefix. The output file name is generated using the
+following pattern: PREFIX-YYYYMMDD_hhmmss_UNIXTS.ts
+.TP
+\fB\-s\fR, \fB\-\-seconds\fR <seconds>
+How much seconds should each individual file be long. The default
+interval is 60 seconds.
+.TP
+\fB\-d\fR, \fB\-\-output\-dir\fR <dir>
+Set the directory into which the files will be written. The default
+directory is . (current directory).
+.TP
+\fB\-D\fR, \fB\-\-create\-dirs\fR
+Save output files into directories named YYYY/MM/DD/hh. The output
+file is created in the top directory and then it is hard linked into
+the output directory. In the top directory you'll see the file that
+is currently written.
+.TP
+.SH INPUT OPTIONS
+.PP
+.TP
+\fB\-i\fR, \fB\-\-input\fR <source>
+Where to read from. tsdumper2 supports input from IPv4 multicast/unicast
+addresses (\-i udp://224.0.0.1:5000/) or IPv6 multicast/unicast
+addresses (\-i udp://[ff01::1111]:5000). RTP input is also supported
+by using rtp:// instead of udp://.
+.TP
+\fB\-z\fR, \fB\-\-input\-ignore\-disc\fR
+Do not report RTP discontinuity errors.
+.TP
+\fB\-4\fR, \fB\-\-ipv4\fR
+Use only IPv4 addresses for the input. IPv6 addresses would be are ignorred.
+.TP
+\fB\-6\fR, \fB\-\-ipv6\fR
+Use only IPv6 addresses of the server. IPv4 addresses would be are ignorred.
+.TP
+.SH MISC OPTIONS
+.PP
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Show program version.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Show program help.
+.TP
+.SH EXAMPLES
+To get a quick start here are some example command lines.
+.nf
+   # Read multicast stream from 239.78.78.78:5000 and save it in
+   # files with test- prefix
+   tsdumper2 --input udp://239.78.78.78:5000/ --prefix test
+
+   # Same as above but create directories YYYY/MM/DD/HH and put
+   # files into the directory.
+   tsdumper2 --input udp://239.78.78.78:5000/ --prefix test --create-dirs
+
+   # Same as above but create directories YYYY/MM/DD/HH and put
+   # files into the directory and create new file each 10 seconds.
+   tsdumper2 --input udp://239.78.78.78:5000/ --prefix test --create-dirs --seconds 10
+.fi
+.SH SEE ALSO
+See the README file for more information. If you have questions, remarks,
+problems or you just want to contact the developer, write to:
+  \fIgeorgi@unixsol.org\fP
+.TP
+For more info, see the website at
+.I http://georgi.unixsol.org/programs/tsdumper2/
+.SH AUTHORS
+Written by Georgi Chorbadzhiyski <\fBgeorgi@unixsol.org\fR>
+.SH LICENSE
+This program is free software; you can redistribute it and/or modify it under
+the terms of version 2 of the GNU General Public License as published by the
+Free Software Foundation.
