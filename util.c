@@ -154,7 +154,7 @@ void p_info(const char *fmt, ...) {
 	if (DEBUG > 0) {
 		struct timeval tv;
 		gettimeofday(&tv, NULL);
-		fprintf(stdout, "%08ld.%08ld ", tv.tv_sec, tv.tv_usec);
+		fprintf(stdout, "%08ld.%08ld ", (long)tv.tv_sec, (long)tv.tv_usec);
 
 		char date[64];
 		struct tm tm;
