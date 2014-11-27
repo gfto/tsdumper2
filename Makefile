@@ -16,7 +16,7 @@ Q = @
 endif
 
 CFLAGS ?= -O2 -ggdb \
- -W -Wall -Wextra \
+ -W -Wall -Wextra -Wredundant-decls \
  -Wshadow -Wformat-security -Wstrict-prototypes
 
 DEFS = -DBUILD_ID=\"$(BUILD_ID)\" \
