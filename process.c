@@ -154,10 +154,9 @@ void *write_thread(void *_ts) {
 		if (!packet->data_len)
 			continue;
 
-		time_t packet_time = packet->ts.tv_sec;
-		time_t file_time   = ALIGN_DOWN(packet_time, ts->rotate_secs);
 		p_dbg1(" - Got packet %d, size: %u, file_time:%lu packet_time:%lu depth:%d\n",
-			packet->num, packet->data_len, file_time, packet_time, ts->packet_queue->items);
+			packet->num, packet->data_len, ALIGN_DOWN(packet->ts.tv_sec, ts->rotate_secs),
+			packet->ts.tv_sec, ts->packet_queue->items);
 
 		handle_files(ts, packet);
 
