@@ -15,9 +15,18 @@ ifndef V
 Q = @
 endif
 
-CFLAGS ?= -O2 -ggdb \
- -W -Wall -Wextra -Wredundant-decls \
- -Wshadow -Wformat-security -Wstrict-prototypes
+CFLAGS ?= -O2 -ggdb -pipe -ffunction-sections -fdata-sections \
+ -W -Wall -Wextra \
+ -Wshadow -Wformat-security -Wstrict-prototypes \
+ -Wredundant-decls -Wold-style-definition
+
+uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+
+LDFLAGS ?= -Wl,--gc-sections
+
+ifeq ($(uname_S),Darwin)
+LDFLAGS :=
+endif
 
 DEFS = -DBUILD_ID=\"$(BUILD_ID)\" \
  -DVERSION=\"$(VERSION)\" -DGIT_VER=\"$(GIT_VER)\"
@@ -57,7 +66,7 @@ $(FUNCS_LIB): $(FUNCS_DIR)/libfuncs.h
 
 tsdumper2: $(tsdumper_OBJS)
 	$(Q)echo "  LINK	tsdumper2"
-	$(Q)$(CC) $(CFLAGS) $(DEFS) $(tsdumper_OBJS) $(tsdumper_LIBS) -o tsdumper2
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) $(DEFS) $(tsdumper_OBJS) $(tsdumper_LIBS) -o tsdumper2
 
 %.o: %.c Makefile RELEASE
 	@$(MKDEP)
