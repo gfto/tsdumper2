@@ -31,7 +31,9 @@ int create_dir(const char *dir, mode_t mode);
 #define p_dbg2(fmt, ...) \
 	do { if (DEBUG > 1) p_info(fmt, __VA_ARGS__); } while(0)
 
-__attribute__ ((format(printf, 1, 2))) void die(const char *fmt, ...);
+__attribute__ ((format(printf, 1, 2)))
+__attribute__ ((noreturn))
+void die(const char *fmt, ...);
 
 __attribute__ ((format(printf, 1, 2))) void p_err(const char *fmt, ...);
 __attribute__ ((format(printf, 1, 2))) void p_info(const char *fmt, ...);
