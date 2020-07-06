@@ -46,7 +46,6 @@ FUNCS_LIB = $(FUNCS_DIR)/libfuncs.a
 tsdumper_SRC = \
  udp.c \
  util.c \
- process.c \
  tsdumper2.c
 tsdumper_LIBS = -lpthread
 

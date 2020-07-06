@@ -154,19 +154,19 @@ void p_info(const char *fmt, ...) {
 	if (DEBUG > 0) {
 		struct timeval tv;
 		gettimeofday(&tv, NULL);
-		fprintf(stdout, "%08ld.%08ld ", (long)tv.tv_sec, (long)tv.tv_usec);
+		fprintf(stderr, "%08ld.%08ld ", (long)tv.tv_sec, (long)tv.tv_usec);
 
 		char date[64];
 		struct tm tm;
 		localtime_r(&tv.tv_sec, &tm);
 		strftime(date, sizeof(date), "%F %H:%M:%S", localtime_r(&tv.tv_sec, &tm));
-		fprintf(stdout, "%s | ", date);
+		fprintf(stderr, "%s | ", date);
 	}
 	va_list args;
 	va_start(args, fmt);
-	vfprintf(stdout, fmt, args);
+	vfprintf(stderr, fmt, args);
 	if (fmt[strlen(fmt) - 1] != '\n')
-		fprintf(stdout, "\n");
+		fprintf(stderr, "\n");
 	va_end(args);
-	fflush(stdout);
+	fflush(stderr);
 }
